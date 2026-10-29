@@ -2,40 +2,36 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", function () {
-    const submitBtn = document.getElementById("submitBtn");
+    const button = document.getElementById("submitBtn");
 
-    if (!submitBtn) {
-        console.error("Кнопка submitBtn не найдена");
-        return;
-    }
+    if (!button) return;
 
-    // Запрещаем стандартную отправку формы
-    submitBtn.type = "button";
+    // Кнопка никогда не отправляет HTML-форму
+    button.type = "button";
 
-    submitBtn.addEventListener("click", async function (event) {
+    button.addEventListener("click", async function (event) {
         event.preventDefault();
+        event.stopPropagation();
 
-        const getValue = (id) => {
+        if (typeof Swal === "undefined") {
+            alert("SweetAlert2 не загрузился. Проверь подключение к интернету.");
+            return;
+        }
+
+        const value = (id) => {
             const element = document.getElementById(id);
             return element ? element.value.trim() : "";
         };
 
-        const name = getValue("name");
-        const phone = getValue("phone");
-        const email = getValue("email");
-        const brand = getValue("brand");
-        const model = getValue("model");
-        const year = getValue("year");
-        const service = getValue("service");
-        const datetime = getValue("datetime");
+        const name = value("name");
+        const phone = value("phone");
+        const email = value("email");
+        const brand = value("brand");
+        const model = value("model");
+        const year = value("year");
+        const service = value("service");
+        const datetime = value("datetime");
 
-        // Проверяем подключение SweetAlert2
-        if (typeof Swal === "undefined") {
-            alert("Не удалось загрузить SweetAlert2. Проверь подключение к интернету.");
-            return;
-        }
-
-        // Проверяем заполнение полей
         if (!name || !phone || !email || !brand ||
             !model || !year || !service || !datetime) {
             await Swal.fire({
@@ -47,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Проверяем имя
         if (name.length < 2) {
             await Swal.fire({
                 icon: "error",
@@ -57,10 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Проверяем телефон
-        const phoneDigits = phone.replace(/\D/g, "");
-
-        if (phoneDigits.length !== 11) {
+        if (phone.replace(/\D/g, "").length !== 11) {
             await Swal.fire({
                 icon: "error",
                 title: "Некорректный телефон",
@@ -69,7 +61,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Проверяем e-mail
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             await Swal.fire({
                 icon: "error",
@@ -79,7 +70,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Проверяем год выпуска
         const currentYear = new Date().getFullYear();
         const carYear = Number(year);
 
@@ -94,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Проверяем дату записи
         const selectedDate = new Date(datetime);
 
         if (Number.isNaN(selectedDate.getTime()) ||
@@ -102,32 +91,29 @@ document.addEventListener("DOMContentLoaded", function () {
             await Swal.fire({
                 icon: "warning",
                 title: "Выберите дату в будущем",
-                text: "Дата и время записи должны быть позже текущего момента."
+                text: "Укажите будущую дату и время записи."
             });
             return;
         }
 
-        // Никаких fetch, POST или отправки на сервер
-        const result = await Swal.fire({
+        await Swal.fire({
             icon: "success",
-            title: "Заявка оформлена!",
+            title: "Заявка принята!",
             text: `Спасибо, ${name}! Демонстрация отправки прошла успешно.`,
             confirmButtonText: "Отлично!",
             confirmButtonColor: "#f0ad4e"
         });
 
-        // Очищаем поля после подтверждения
-        if (result.isConfirmed) {
-            [
-                "name", "phone", "email", "brand",
-                "model", "year", "datetime"
-            ].forEach(function (id) {
-                const element = document.getElementById(id);
-                if (element) element.value = "";
-            });
+        // Очищаем поля; сетевых запросов не выполняем
+        [
+            "name", "phone", "email", "brand",
+            "model", "year", "datetime"
+        ].forEach(function (id) {
+            const element = document.getElementById(id);
+            if (element) element.value = "";
+        });
 
-            const serviceSelect = document.getElementById("service");
-            if (serviceSelect) serviceSelect.selectedIndex = 0;
-        }
+        const serviceSelect = document.getElementById("service");
+        if (serviceSelect) serviceSelect.selectedIndex = 0;
     });
 });
