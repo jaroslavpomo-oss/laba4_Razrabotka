@@ -104,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
             confirmButtonColor: "#f0ad4e"
         });
 
-        // Очищаем поля; сетевых запросов не выполняем
         [
             "name", "phone", "email", "brand",
             "model", "year", "datetime"
