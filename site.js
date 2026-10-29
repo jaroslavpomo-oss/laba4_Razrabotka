@@ -1,7 +1,7 @@
 const form = document.forms["myForm"];
-const btn = document.getElementById("submitBtn");
 
-btn.addEventListener("click", () => {
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
   const data = new FormData(form);
   console.log(Object.fromEntries(data.entries()));
 
